@@ -24,7 +24,12 @@ def get_pdf_links(cdx_api, url):
         "fl": "url",
     }
 
-    response = requests.get(cdx_api, params=params)
+    try:
+        response = requests.get(cdx_api, params=params)
+    except ConnectionError as e:
+        print("Sleeping before retry...")
+        time.sleep(2)
+        return get_pdf_links(cdx_api, url)
 
     if response.status_code == 404:
         return []

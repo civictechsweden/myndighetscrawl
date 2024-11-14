@@ -1,4 +1,5 @@
 import csv
+import os
 
 import cc
 
@@ -9,7 +10,12 @@ with open("urls.csv", "r") as file:
 
 pdf_urls = []
 
+data = os.listdir("./data")
+
 for agency_url in agency_urls[1:]:
+    if f"{agency_url}.csv" in data:
+        continue
+
     print(f"Searching for {agency_url}...")
 
     for index in cc.get_collinfo():
@@ -22,7 +28,7 @@ for agency_url in agency_urls[1:]:
             item_url = item["url"]
             pdf_urls.append((agency_url, index["id"].replace("CC-MAIN-", ""), item_url))
 
-    with open("urls_list.csv", mode="w", newline="") as file:
+    with open(f"./data/{agency_url}.csv", mode="w", newline="") as file:
         writer = csv.writer(file)
         writer.writerow(["Domain", "Period", "URL"])
         writer.writerows(sorted(list(set(pdf_urls))))
