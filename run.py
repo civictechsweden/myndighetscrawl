@@ -10,7 +10,7 @@ with open("urls.csv", "r") as file:
 
 data = os.listdir("./data")
 
-downloader = None  # Downloader(cc.CC_URL)
+downloader = Downloader(cc.CC_URL)
 
 for agency_url in agency_urls[1:]:
     pdf_urls = []
