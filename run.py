@@ -12,10 +12,11 @@ data = os.listdir("./data")
 
 downloader = Downloader(cc.CC_URL)
 
-for agency_url in agency_urls[1:]:
+for agency_url in agency_urls:
     pdf_urls = []
 
     if f"{agency_url}.csv" in data:
+        print(f"Skipping {agency_url}...")
         continue
 
     print(f"Searching for {agency_url}...")

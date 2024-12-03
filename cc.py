@@ -29,7 +29,7 @@ def get_pdf_links(downloader: Downloader, cdx_api, url):
     try:
         # response = requests.get(cdx_api, params=params)
         response = downloader.fetch(cdx_api, params)
-    except ConnectionError as e:
+    except requests.exceptions.ConnectionError:
         print("Sleeping before retry...")
         time.sleep(2)
         return get_pdf_links(downloader, cdx_api, url)
