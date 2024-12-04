@@ -1,19 +1,18 @@
 import os
 import pandas as pd
-import urllib.parse
 
 
-def filename(url):
-    parsed_url = urllib.parse.urlparse(url)
-    path = parsed_url.path
-    pdf_name = path.split("/")[-1]
-
-    return pdf_name
+def filename(urls):
+    return urls.str.split("/").str[-1]
 
 
-def web_url(timestamp, original):
-    timestamp_str = str(int(timestamp))
-    return f"https://web.archive.org/web/{timestamp_str}/{original}"
+def web_url(timestamps, originals):
+    return (
+        "https://web.archive.org/web/"
+        + (timestamps.astype(int).astype(str))
+        + "/"
+        + originals
+    )
 
 
 data = sorted(os.listdir("./data/ia"))
@@ -23,19 +22,35 @@ for file in data:
     try:
         df = pd.read_csv("./data/ia/" + file)
         if not df.empty:
+            print(f"Adding: {file}")
             dfs.append(df)
     except pd.errors.EmptyDataError:
         print(f"Empty file: {file}")
 
+print("Concatenating...")
 combined = pd.concat(dfs)
 
-combined["archive"] = combined.apply(
-    lambda row: web_url(row["timestamp"], row["original"]), axis=1
-)
+print("Adding archive urls...")
+combined["archive"] = web_url(combined["timestamp"], combined["original"])
 
-combined["filename"] = combined["original"].apply(filename)
-
+print("Adding filename...")
+combined["filename"] = filename(combined["original"])
 
 print(f"Saving combined.csv with {len(combined)} rows...")
 combined.to_csv("combined.csv", index=False)
 combined.to_parquet("combined.parquet", index=False)
+
+combined = pd.read_parquet("combined.parquet")
+
+
+def subset(text):
+    df = combined[combined["original"].str.contains(text)]
+    df = df.sort_values(by="timestamp")
+    df.to_csv(f"./csv/{text}.csv", index=False)
+
+
+subset("reports")
+subset("publikation")
+subset("rsredovisning")
+subset("budgetunderlag")
+subset("regleringsbrev")
